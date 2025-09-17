@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Daftar Produk</title>
+</head>
+<body>
+    <h1>Daftar Produk</h1>
+
+    <!-- Tombol Add -->
+    <a href="{% url 'add_form' %}">Tambah Produk</a>
+
+    <ul>
+        {% for item in data %}
+            <li>
+                {{ item.name }} - Rp {{ item.price }}
+                <a href="{% url 'detail' item.id %}">Detail</a>
+            </li>
+        {% empty %}
+            <li>Belum ada produk.</li>
+        {% endfor %}
+    </ul>
+
+    <hr>
+    <!-- Link ke data delivery -->
+    <h3>Data Delivery:</h3>
+    <ul>
+        <li><a href="{% url 'data_xml' %}">Lihat data dalam XML</a></li>
+        <li><a href="{% url 'data_json' %}">Lihat data da_
