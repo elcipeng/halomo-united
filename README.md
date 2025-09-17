@@ -87,3 +87,46 @@ Cocok untuk pembelajaran dasar web development: dengan Django, kita bisa belajar
 
 ## Apakah ada feedback untuk asisten dosen tutorial 1 yang telah kamu kerjakan sebelumnya?
 Tutorial sudah sangat membantu dan simpel sekali untuk diikuti
+
+#Tugas Tugas 3: Implementasi Form dan Data Delivery pada Django
+Nama : Justin Dwitama Seniang
+NPM : 2406406742
+Kelas : PBP D
+
+PWS : https://justin-dwitama-halomounited.pbp.cs.ui.ac.id
+
+## 1. Jelaskan mengapa kita memerlukan data delivery dalam pengimplementasian sebuah platform?
+Data delivery dibutuhkan agar informasi dari server dapat sampai ke client dengan format yang bisa diproses. Tanpa mekanisme pengiriman data, aplikasi tidak bisa berinteraksi secara dinamis. Misalnya, pengguna hanya akan melihat tampilan statis tanpa ada perubahan data terbaru. Dengan data delivery, platform bisa menampilkan data real-time, melakukan update otomatis, dan mendukung integrasi dengan sistem lain.
+
+## 2. Menurutmu, mana yang lebih baik antara XML dan JSON? Mengapa JSON lebih populer dibandingkan XML?
+
+-JSON lebih baik untuk kebanyakan kasus modern karena:
+-Lebih ringkas dan lebih mudah dibaca.
+-Mendukung struktur data langsung (array, objek) tanpa markup berlebihan.
+-Parsing JSON lebih efisien dibandingkan XML.
+-Banyak framework modern langsung mendukung JSON.
+XML masih dipakai untuk sistem lama atau kebutuhan khusus (misalnya data dengan schema kompleks), tapi JSON lebih populer karena kesederhanaan dan kecepatan.
+
+## 3. Jelaskan fungsi dari method is_valid() pada form Django dan mengapa kita membutuhkan method tersebut?
+is_valid() digunakan untuk memvalidasi data yang dikirim lewat form. Method ini akan memeriksa apakah semua field sudah diisi sesuai aturan (misalnya tipe data benar, tidak ada field wajib yang kosong). Kita membutuhkan method ini supaya data yang masuk ke database valid dan terhindar dari error maupun data kotor.
+
+## 4. Mengapa kita membutuhkan csrf_token saat membuat form di Django? Apa yang dapat terjadi jika kita tidak menambahkan csrf_token pada form Django? Bagaimana hal tersebut dapat dimanfaatkan oleh penyerang?
+csrf_token adalah token keamanan untuk mencegah serangan Cross-Site Request Forgery (CSRF). Token ini memastikan bahwa request form benar-benar berasal dari website kita, bukan dari website berbahaya lain.
+- Jika tidak ada csrf_token, penyerang bisa membuat form palsu yang secara diam-diam mengirimkan request ke server kita (misalnya transfer uang, ubah data, hapus akun).
+- Dengan token ini, server hanya menerima request yang memiliki kode unik sesuai sesi pengguna, sehingga aman dari penyalahgunaan.
+
+## 5. Jelaskan bagaimana cara kamu mengimplementasikan checklist di atas secara step-by-step (bukan hanya sekadar mengikuti tutorial).
+
+1. Membuat 4 views untuk menampilkan data (XML, JSON, XML by ID, JSON by ID).
+2. Menambahkan URL routing pada urls.py untuk setiap views.
+3. Membuat halaman index yang menampilkan daftar objek model dan menambahkan tombol Add serta Detail.
+4. Membuat halaman form untuk menambahkan data baru ke model.
+5. Membuat halaman detail untuk melihat informasi lengkap objek tertentu.
+6. Menguji semua fitur agar berjalan sesuai checklist.
+7. Menulis jawaban pertanyaan ini di README.md.
+
+## 6. Apakah ada feedback untuk untuk asdos di tutorial 2 yang sudah kalian kerjakan?
+
+-Penjelasan sudah jelas tapi bisa lebih banyak contoh praktis.
+-Waktu praktikum terlalu cepat, sebaiknya ada waktu tambahan untuk tanya jawab.
+-Materi sudah sesuai dengan kebutuhan tugas.
