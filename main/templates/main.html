@@ -48,10 +48,9 @@
   | <b>Owner:</b> {{ product.user.username }}
   </p>
 
-  {% if product.thumbnail %}
-    <img src="{{ product.thumbnail }}" alt="{{ product.name }}" width="200">
-    <br />
-  {% endif %}
+{% if product.thumbnail %}
+    <img src="{{ product.thumbnail.url }}" alt="{{ product.name }}" width="200">
+{% endif %}
 
   <p>{{ product.description|truncatewords:25 }}...</p>
 
