@@ -30,7 +30,11 @@ SECRET_KEY = 'django-insecure-75r0h@p3yxyh@91#jjt-=xy#*rnt-@+ty#3sem^@a3l(qygdsl
 PRODUCTION = os.getenv('PRODUCTION', 'False').lower() == 'true'
 DEBUG = True
 
-CSRF_TRUSTED_ORIGINS = ['https://justin-duitama-halomounted.pbp.cs.ui.ac.id/']
+CSRF_TRUSTED_ORIGINS = [
+    "https://*.pbp.cs.ui.ac.id",
+    "http://localhost:8000",
+    "http://127.0.0.1:8000",
+]
 
 ALLOWED_HOSTS = ["localhost", "127.0.0.1", "justin-dwitama-halomounited.pbp.cs.ui.ac.id"]
 
