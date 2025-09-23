@@ -17,8 +17,7 @@ class Product(models.Model):
     thumbnail = models.ImageField(upload_to='thumbnails/', null=True, blank=True)
     category = models.CharField(max_length=100, choices=CATEGORY_CHOICES, blank=True)
     is_featured = models.BooleanField(default=False)
-
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
 
     def __str__(self):
         return self.name
