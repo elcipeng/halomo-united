@@ -1,15 +1,13 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Create Product</title>
-</head>
-<body>
-    <h1>Add New Product</h1>
-    <form method="POST">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Save</button>
-    </form>
-    <a href="{% url 'index' %}">Back to Product List</a>
-</body>
-</html>
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>Add Product</h2>
+
+<form method="POST">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Save</button>
+</form>
+
+<a href="{% url 'main:show_main' %}">Back</a>
+{% endblock %}

@@ -1,4 +1,4 @@
-#Tugas Tugas 2: Implementasi Model-View-Template (MVT) pada Django
+# Tugas 2: Implementasi Model-View-Template (MVT) pada Django
 Nama : Justin Dwitama Seniang
 NPM : 2406406742
 Kelas : PBP D
@@ -88,12 +88,13 @@ Cocok untuk pembelajaran dasar web development: dengan Django, kita bisa belajar
 ## Apakah ada feedback untuk asisten dosen tutorial 1 yang telah kamu kerjakan sebelumnya?
 Tutorial sudah sangat membantu dan simpel sekali untuk diikuti
 
-#Tugas Tugas 3: Implementasi Form dan Data Delivery pada Django
+# Tugas 3: Implementasi Form dan Data Delivery pada Django
 Nama : Justin Dwitama Seniang
 NPM : 2406406742
 Kelas : PBP D
 
 PWS : https://justin-dwitama-halomounited.pbp.cs.ui.ac.id
+POSTMAN : https://drive.google.com/file/d/1folqPAhhkmLQwJ5o-8yQAeTGT9Vvo0D-/view?usp=drive_link
 
 ## 1. Jelaskan mengapa kita memerlukan data delivery dalam pengimplementasian sebuah platform?
 Data delivery dibutuhkan agar informasi dari server dapat sampai ke client dengan format yang bisa diproses. Tanpa mekanisme pengiriman data, aplikasi tidak bisa berinteraksi secara dinamis. Misalnya, pengguna hanya akan melihat tampilan statis tanpa ada perubahan data terbaru. Dengan data delivery, platform bisa menampilkan data real-time, melakukan update otomatis, dan mendukung integrasi dengan sistem lain.
@@ -130,3 +131,65 @@ csrf_token adalah token keamanan untuk mencegah serangan Cross-Site Request Forg
 -Penjelasan sudah jelas tapi bisa lebih banyak contoh praktis.
 -Waktu praktikum terlalu cepat, sebaiknya ada waktu tambahan untuk tanya jawab.
 -Materi sudah sesuai dengan kebutuhan tugas.
+
+# Tugas 4: Implementasi Autentikasi, Session, dan Cookies pada Django
+Nama : Justin Dwitama Seniang
+NPM : 2406406742
+Kelas : PBP D
+
+PWS : https://justin-dwitama-halomounited.pbp.cs.ui.ac.id
+
+## 1. Apa itu Django AuthenticationForm
+
+AuthenticationForm adalah form bawaan atau built in django yang digunakan untuk proses login pengguna. Form ini sudah otomatis menyediakan field username dan password, serta melakukan validasi terhadap kredensial yang dimasukkan.
+
+Kelebihan:
+1. Sudah terintegrasi dengan sistem autentikasi Django
+2. Validasi username & password dilakukan otomatis.
+3. Aman karena memanfaatkan mekanisme hashing password Django.
+4. Praktis, tidak perlu membuat form login dari nol
+
+Kekurangan:
+1. Hanya mendukung login dengan username secara default (jika ingin login dengan email, perlu kustomisasi).
+2.  Tampilannya sederhana, biasanya butuh modifikasi jika ingin menyesuaikan UI.
+
+## 2. Perbedaan Autentikasi dan Otorisasi
+
+Autentikasi = proses verifikasi identitas pengguna (contoh: login dengan username & password).
+
+Otorisasi = proses menentukan hak akses setelah pengguna berhasil diautentikasi (contoh: hanya admin bisa menghapus data).
+
+Implementasi di Django:
+•	Autentikasi → disediakan oleh sistem django.contrib.auth dengan AuthenticationForm, authenticate(), dan login().
+•	Otorisasi → dilakukan dengan Permissions, Groups, serta decorator seperti @login_required dan @permission_required.
+
+## 3. Kelebihan dan Kekurangan Session & Cookies
+
+Session:
+•	Kelebihan: Data disimpan di server, lebih aman; pengguna hanya menyimpan session ID di cookie.•	Kekurangan: Membebani server karena data session harus disimpan di database/memori.
+
+Cookies:
+•	Kelebihan: Ringan, data langsung tersimpan di browser pengguna. Cocok untuk data kecil.
+•	Kekurangan: Rentan diubah pengguna, bisa dimanipulasi; risiko keamanan jika menyimpan data sensitif.
+
+## 4. Apakah Cookies Aman Secara Default?
+
+Tidak sepenuhnya aman. Risiko yang perlu diwaspadai:
+	•	Cookie theft (pencurian cookies) lewat serangan XSS.
+	•	Session hijacking jika cookie berisi session ID bocor.
+	•	Cookie manipulation karena pengguna bisa mengubah nilainya.
+
+Cara Django menangani:
+	•	Password tidak pernah disimpan di cookie, hanya session ID yang disimpan.
+	•	Mendukung HttpOnly cookies (mencegah akses via JavaScript).
+	•	Mendukung Secure cookies (hanya dikirim melalui HTTPS).
+	•	Menyediakan proteksi CSRF secara default (csrftoken).
+
+## 5.  Jelaskan bagaimana cara kamu mengimplementasikan checklist di atas secara step-by-step (bukan hanya sekadar mengikuti tutorial).
+
+Untuk mengimplementasikan fungsi autentikasi, saya terlebih dahulu memahami bagaimana Django mengelola state login dengan session dan cookie. Django menyimpan informasi login pengguna melalui session, sehingga `request.user` bisa diakses di setiap request. Hal ini penting agar aplikasi dapat menyesuaikan tampilan sesuai status login maupun logout.  
+Pada tahap registrasi, saya memanfaatkan `UserCreationForm` untuk mempermudah pembuatan akun baru, serta `messages` untuk memberi notifikasi. Fungsi registrasi saya buat di `views.py`, dengan kondisi jika request berupa POST maka data akan disimpan, lalu diarahkan ke halaman login. Setelah itu saya membuat halaman `register.html` dan menambahkan path ke `urls.py`.  
+Selanjutnya saya membuat fitur login menggunakan `AuthenticationForm` dan fungsi `login()` dari Django. Jika data valid, pengguna akan diarahkan ke halaman utama, sekaligus saya set cookie `last_login` agar informasi login terakhir bisa ditampilkan kembali. Untuk logout, saya cukup menggunakan fungsi `logout()` dari Django, menambahkan logika di `views.py`, lalu menaruh tombol logout di `main.html` agar pengguna bisa keluar dengan mudah.  
+Setelah fitur autentikasi berjalan, saya membuat dua akun pengguna berbeda dan masing-masing diberi tiga produk dummy. Model `Product` saya hubungkan dengan model `User` melalui field `owner = models.ForeignKey(User, on_delete=models.CASCADE)`. Dengan relasi ini, setiap produk akan tercatat sebagai milik pengguna tertentu.  
+Terakhir, pada halaman utama saya menampilkan detail pengguna yang sedang login seperti username dan `last_login`. Informasi tersebut diambil dari `request.user` serta cookie yang sudah saya set sebelumnya. Dengan demikian, seluruh checklist seperti autentikasi, pembuatan akun dengan data dummy, relasi produk dengan user, serta tampilan detail informasi pengguna sudah terpenuhi.
+

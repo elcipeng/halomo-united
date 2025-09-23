@@ -1,17 +1,30 @@
-from django.urls import path
+from django.urls import path 
 from . import views
+from main.views import register, login_user, logout_user
+
+
+app_name = 'main'
 
 urlpatterns = [
-    path('', views.index, name='index'),  # daftar produk
-    path('add/', views.add_form, name='add_form'),
-    path('detail/<int:id>/', views.detail, name='detail'),
+    path('', views.show_main, name='show_main'),
+    path('detail/<int:id>/', views.show_product, name='show_product'),
 
     # data delivery
-    path('xml/', views.data_xml, name='data_xml'),
-    path('json/', views.data_json, name='data_json'),
-    path('xml/<int:id>/', views.data_xml_by_id, name='data_xml_by_id'),
-    path('json/<int:id>/', views.data_json_by_id, name='data_json_by_id'),
+    path('xml/', views.show_xml, name='show_xml'),
+    path('json/', views.show_json, name='show_json'),
+    path('xml/<int:product_id>/', views.show_xml_by_id, name='show_xml_by_id'),
+    path('json/<int:product_id>/', views.show_json_by_id, name='show_json_by_id'),
 
     # halaman utama
     path('main/', views.show_main, name='show_main'),
+
+    # auth
+    path('register/', register, name='register'),
+    path('login/', login_user, name='login'),
+    path('logout/', logout_user, name='logout'),
+
+    # create product
+    path('register/', register, name='register'),
+    path("create-product/", views.create_product, name="create_product"),
 ]
+

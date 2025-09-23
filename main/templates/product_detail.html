@@ -5,9 +5,19 @@
 </head>
 <body>
     <h1>{{ product.name }}</h1>
-    <p><strong>Price:</strong> {{ product.price }}</p>
-    <p><strong>Description:</strong> {{ product.description }}</p>
 
-    <a href="{% url 'index' %}">Back to Product List</a>
+    <p><strong>Price:</strong> {{ product.price }}</p>
+    <p><strong>Category:</strong> {{ product.category }}</p>
+    <p><strong>Description:</strong> {{ product.description }}</p>
+    {% if product.thumbnail %}
+        <div>
+            <strong>Thumbnail:</strong><br>
+            <img src="{{ product.thumbnail.url }}" alt="{{ product.name }}" width="200">
+        </div>
+    {% else %}
+        <p><em>No thumbnail available</em></p>
+    {% endif %}
+
+    <a href="{% url 'main:show_main' %}">Back to Product List</a>
 </body>
 </html>

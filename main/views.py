@@ -1,56 +1,126 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
 from django.core import serializers
 from .models import Product
 from .forms import ProductForm
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+from django.contrib import messages
+from django.contrib.auth import login, logout
+from django.contrib.auth.decorators import login_required
+from django.urls import reverse
+import datetime
+from django.utils import timezone
+from django.http import HttpResponseRedirect
+from django.shortcuts import render, redirect
+from .forms import ProductForm
 
+# Halaman utama
+@login_required(login_url='/login')
 def show_main(request):
+    filter_type = request.GET.get("filter", "all")  # default 'all'
+
+    if filter_type == "my":
+        product_list = Product.objects.filter(user=request.user)   # ⬅️ query filter by user
+    else:
+        product_list = Product.objects.all()
+
     context = {
-        'nama_aplikasi': 'HaloMo United',
-        'name': 'Justin Dwitama Seniang',
+        'npm': '240123456',
+        'name': request.user.username,
         'class': 'PBP D',
+        'product_list': product_list,
+        'last_login': request.COOKIES.get('last_login', 'Never')
     }
     return render(request, "main.html", context)
 
-# 1. XML
-def data_xml(request):
-    data = serializers.serialize("xml", Product.objects.all())
-    return HttpResponse(data, content_type="application/xml")
 
-# 2. JSON
-def data_json(request):
-    data = serializers.serialize("json", Product.objects.all())
-    return HttpResponse(data, content_type="application/json")
-
-# 3. XML by ID
-def data_xml_by_id(request, id):
-    obj = get_object_or_404(Product, pk=id)
-    data = serializers.serialize("xml", [obj])
-    return HttpResponse(data, content_type="application/xml")
-
-# 4. JSON by ID
-def data_json_by_id(request, id):
-    obj = get_object_or_404(Product, pk=id)
-    data = serializers.serialize("json", [obj])
-    return HttpResponse(data, content_type="application/json")
-
-# Index / daftar produk
-def index(request):
-    data = Product.objects.all()
-    return render(request, "index.html", {"data": data})
-
-# Create product
-def add_form(request):
+# Create Product
+@login_required(login_url='/login')
+def create_product(request):
     if request.method == "POST":
         form = ProductForm(request.POST)
         if form.is_valid():
-            form.save()
-            return redirect('index')
+            product = form.save(commit=False)
+            product.user = request.user
+            product.save()
+            return redirect("main:show_main")
     else:
         form = ProductForm()
-    return render(request, 'create_product.html', {'form': form})
+    return render(request, "create_product.html", {"form": form})
 
-# Detail produk
-def detail(request, id):
+
+# Detail Product
+@login_required(login_url='/login')
+def show_product(request, id):
     product = get_object_or_404(Product, pk=id)
-    return render(request, 'product_detail.html', {'product': product})
+
+    context = {'product': product}
+    return render(request, "product_detail.html", context)
+
+# XML
+def show_xml(request):
+    product_list = Product.objects.all()
+    xml_data = serializers.serialize("xml", product_list)
+    return HttpResponse(xml_data, content_type="application/xml")
+
+# JSON
+def show_json(request):
+    product_list = Product.objects.all()
+    json_data = serializers.serialize("json", product_list)
+    return HttpResponse(json_data, content_type="application/json")
+
+# XML by ID
+def show_xml_by_id(request, product_id):
+    try:
+        product_item = Product.objects.filter(pk=product_id)
+        xml_data = serializers.serialize("xml", product_item)
+        return HttpResponse(xml_data, content_type="application/xml")
+    except Product.DoesNotExist:
+        return HttpResponse(status=404)
+
+# JSON by ID
+def show_json_by_id(request, product_id):
+    try:
+        product_item = Product.objects.get(pk=product_id)
+        json_data = serializers.serialize("json", [product_item])
+        return HttpResponse(json_data, content_type="application/json")
+    except Product.DoesNotExist:
+        return HttpResponse(status=404)
+
+# Register
+def register(request):
+    form = UserCreationForm()
+
+    if request.method == "POST":
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Your account has been successfully created!')
+            return redirect('main:login')
+
+    context = {'form': form}
+    return render(request, 'register.html', context)
+
+# Login
+def login_user(request):
+    if request.method == 'POST':
+        form = AuthenticationForm(data=request.POST)
+
+        if form.is_valid():
+            user = form.get_user()
+            login(request, user)
+            response = HttpResponseRedirect(reverse("main:show_main"))
+            response.set_cookie('last_login', str(datetime.datetime.now()))
+            return response
+    else:
+        form = AuthenticationForm(request)
+
+    context = {'form': form}
+    return render(request, 'login.html', context)
+
+# Logout
+def logout_user(request):
+    logout(request)
+    response = HttpResponseRedirect(reverse('main:login'))
+    response.delete_cookie('last_login')
+    return response

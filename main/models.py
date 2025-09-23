@@ -1,16 +1,25 @@
 from django.db import models
 from django.core.validators import MinValueValidator
+from django.contrib.auth.models import User
 
 class Product(models.Model):
-    name = models.CharField(max_length=255)                     # nama item
-    price = models.IntegerField(validators=[MinValueValidator(0)])  # harga; gunakan positive validator
-    description = models.TextField(blank=True)                  # deskripsi panjang
-    thumbnail = models.URLField(blank=True)                     # URL gambar (atau pakai ImageField jika upload)
-    category = models.CharField(max_length=100, blank=True)     # kategori item
-    is_featured = models.BooleanField(default=False)            # status unggulan
+    CATEGORY_CHOICES = [
+        ('jersey', 'Jersey'),
+        ('sepatu', 'Sepatu'),
+        ('aksesoris', 'Aksesoris'),
+        ('peralatan', 'Peralatan Olahraga'),
+        ('lainnya', 'Lainnya'),
+    ]
+
+    name = models.CharField(max_length=255)
+    price = models.IntegerField(validators=[MinValueValidator(0)])
+    description = models.TextField(blank=True)
+    thumbnail = models.ImageField(upload_to='thumbnails/', null=True, blank=True)
+    category = models.CharField(max_length=100, choices=CATEGORY_CHOICES, blank=True)
+    is_featured = models.BooleanField(default=False)
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.name
 
-
-    
