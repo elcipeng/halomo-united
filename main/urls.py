@@ -1,7 +1,7 @@
 from django.urls import path 
 from . import views
 from main.views import register, login_user, logout_user
-
+from main.views import edit_product
 
 app_name = 'main'
 
@@ -25,5 +25,8 @@ urlpatterns = [
     # create product
     path('register/', register, name='register'),
     path("create-product/", views.create_product, name="create_product"),
+    path('product/<int:id>/edit', edit_product, name='edit_product'),
+    path("product/<int:id>/delete", views.delete_product, name="delete_product"),
+
 ]
 
