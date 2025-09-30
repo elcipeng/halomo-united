@@ -14,7 +14,7 @@ class Product(models.Model):
     name = models.CharField(max_length=255)
     price = models.IntegerField(validators=[MinValueValidator(0)])
     description = models.TextField(blank=True)
-    thumbnail = models.URLField(max_length=255)
+    thumbnail = models.URLField(blank=True)
     category = models.CharField(max_length=100, choices=CATEGORY_CHOICES, blank=True)
     is_featured = models.BooleanField(default=False)
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
