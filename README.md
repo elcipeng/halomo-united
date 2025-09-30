@@ -192,3 +192,70 @@ Selanjutnya saya membuat fitur login menggunakan `AuthenticationForm` dan fungsi
 Setelah fitur autentikasi berjalan, saya membuat dua akun pengguna berbeda dan masing-masing diberi tiga produk dummy. Model `Product` saya hubungkan dengan model `User` melalui field `owner = models.ForeignKey(User, on_delete=models.CASCADE)`. Dengan relasi ini, setiap produk akan tercatat sebagai milik pengguna tertentu.  
 Terakhir, pada halaman utama saya menampilkan detail pengguna yang sedang login seperti username dan `last_login`. Informasi tersebut diambil dari `request.user` serta cookie yang sudah saya set sebelumnya. Dengan demikian, seluruh checklist seperti autentikasi, pembuatan akun dengan data dummy, relasi produk dengan user, serta tampilan detail informasi pengguna sudah terpenuhi.
 
+# Tugas 5: Desain Web menggunakan HTML, CSS dan Framework CSS
+Nama : Justin Dwitama Seniang
+NPM : 2406406742
+Kelas : PBP D
+
+PWS : https://justin-dwitama-halomounited.pbp.cs.ui.ac.id
+
+Tentu, ini adalah versi ringkas yang sudah diformat dalam Markdown. Anda bisa langsung salin-tempel seluruhnya ke dalam file README.md Anda.
+
+## 1. Urutan Prioritas CSS Selector
+Prioritas selector CSS ditentukan oleh spesifisitas (specificity). Aturan dengan spesifisitas lebih tinggi akan diterapkan. Urutan dari prioritas tertinggi hingga terendah adalah:
+1. Inline Styles (atribut style="...")
+2. ID Selectors (#id)
+3. Class, Attribute, dan Pseudo-class Selectors (.class, [type="text"], :hover)
+4. Type Selectors dan Pseudo-elements (h1, p, ::before)
+Aturan !important akan mengesampingkan semua prioritas di atas.
+Contoh:
+CSS
+p#intro { color: blue; } /* Lebih spesifik (ID) */
+p.text { color: red; }   /* Kurang spesifik (Class) */
+HTML
+<p id="intro" class="text">Teks ini akan berwarna biru karena ID lebih prioritas.</p>
+
+## 2. Pentingnya Responsive Design
+Responsive design penting karena memastikan aplikasi web memberikan pengalaman pengguna (UX) yang optimal di semua perangkat (desktop, tablet, mobile). Hal ini krusial karena:
+Mayoritas trafik web berasal dari perangkat mobile. Mengabaikan pengguna mobile berarti kehilangan sebagian besar audiens.
+Meningkatkan peringkat SEO. Google memprioritaskan situs yang mobile-friendly.
+
+Contoh:
+Sudah Responsif: Tokopedia. Tampilannya berubah total dari versi desktop ke mobile. Navigasi di mobile pindah ke bawah agar mudah dijangkau jempol, dan produk ditampilkan dalam satu kolom vertikal yang mudah di-scroll.
+Belum Responsif: Situs-situs akademik atau pemerintahan lama. Pengguna mobile harus melakukan pinch-and-zoom untuk membaca teks dan kesulitan menekan link yang terlalu kecil.
+
+## 3. Pentingnya Responsive Design
+Ketiganya adalah komponen dari CSS Box Model yang mengatur ruang di sekitar konten.
+Padding: Ruang transparan di dalam border, yang memisahkan konten dari border.
+Border: Garis yang mengelilingi padding dan konten.
+Margin: Ruang transparan di luar border, yang memberi jarak antara elemen tersebut dengan elemen lain.
+Implementasi:
+
+CSS
+.box {
+  padding: 15px;           /* Ruang di dalam */
+  border: 1px solid black; /* Garis bingkai */
+  margin: 20px;            /* Jarak di luar */
+}
+## 4. Konsep Flexbox dan Grid Layout
+Flexbox
+Konsep: Layout satu dimensi untuk mengatur item dalam satu baris (row) atau satu kolom (column).
+Kegunaan: Ideal untuk komponen UI seperti navbar, alignment item di dalam kartu, atau memusatkan konten.
+
+Grid
+Konsep: Layout dua dimensi untuk mengatur item dalam baris dan kolom secara bersamaan.
+Kegunaan: Sempurna untuk layout halaman keseluruhan, seperti galeri produk, dashboard, atau tata letak kompleks lainnya.
+
+## 5. Step-by-Step Implementasi Checklist
+
+Proses pengerjaan tugas ini dilakukan dengan alur sebagai berikut:
+
+1. Implementasi Fungsi dan Setup Awal: Langkah pertama adalah fokus pada backend. Saya mengimplementasikan fungsi edit_product dan delete_product di views.py beserta URL routing-nya di urls.py. Pada tahap ini, framework CSS Tailwind CSS juga diintegrasikan ke dalam proyek sebagai fondasi untuk semua kustomisasi desain yang akan dilakukan.
+
+2. Desain Halaman Autentikasi: Setelah fungsionalitas inti siap, pekerjaan dilanjutkan ke antarmuka pengguna, dimulai dari halaman login dan register. Halaman-halaman ini didesain ulang dengan layout yang lebih modern, seperti menggunakan dua kolom dan menambahkan logo "Halomo United" untuk memberikan kesan profesional saat pengguna pertama kali berinteraksi dengan aplikasi.
+
+3. Desain Halaman Utama dan Kartu Produk: Selanjutnya, saya merombak halaman utama (main page). Header teks yang sederhana diganti dengan Hero Section yang memiliki gambar latar dinamis untuk memberikan visual yang kuat. Kemudian, card_product.html didesain ulang agar lebih menarik dengan efek hover "pop-up". Pada kartu inilah tombol ikon untuk Edit dan Delete ditambahkan, menghubungkan desain frontend dengan fungsionalitas backend yang dibuat pada langkah pertama.
+
+4. Kustomisasi Halaman Detail Produk: Halaman detail produk, yang diakses dari link "Read more" pada kartu, juga didesain ulang. Saya menerapkan layout dua kolom menggunakan Flexbox untuk memisahkan gambar produk di sisi kiri dan detail informasinya (harga, deskripsi, penjual) di sisi kanan, sehingga lebih mudah dibaca.
+
+5. Finalisasi Desain Forms (Create & Edit): Sebagai langkah terakhir, saya melakukan kustomisasi pada halaman create_product.html dan edit_product.html. Untuk memastikan semua form memiliki tampilan yang konsisten, saya meninggalkan looping form Django yang generik. Sebagai gantinya, semua styling (seperti border, padding, dan focus ring) didefinisikan secara terpusat di forms.py menggunakan atribut widgets. Dengan cara ini, satu ProductForm yang sudah didesain dengan baik dapat digunakan untuk kedua halaman tersebut, memastikan tampilan yang seragam dan profesional.

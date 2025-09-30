@@ -20,12 +20,12 @@ def show_main(request):
     filter_type = request.GET.get("filter", "all")  # default 'all'
 
     if filter_type == "my":
-        product_list = Product.objects.filter(user=request.user)   # ⬅️ query filter by user
+        product_list = Product.objects.filter(user=request.user)   #  query filter by user
     else:
         product_list = Product.objects.all()
 
     context = {
-        'npm': '240123456',
+        'npm': '2406406742',
         'name': request.user.username,
         'class': 'PBP D',
         'product_list': product_list,
