@@ -7,12 +7,12 @@
 
 {% block content %}
 {% include 'navbar.html' %}
+
 <div class="bg-gray-100 w-full min-h-screen">
 
     <div class="relative bg-gray-800 h-[60vh] flex items-center justify-center text-center overflow-hidden">
-        
-        <img src="{% static 'images/background-home.png' %}" alt="Football Stadium" class="absolute top-0 left-0 w-full h-full object-cover opacity-30 ken-burns-effect">
-        
+        <img src="{% static 'images/background-home.png' %}" alt="Football Stadium"
+             class="absolute top-0 left-0 w-full h-full object-cover opacity-30 ken-burns-effect">
         <div class="relative z-10 px-4">
             <h1 class="text-4xl md:text-6xl font-extrabold text-white leading-tight mb-4 tracking-wide">
                 United in Passion. <span class="block">Driven by Glory.</span>
@@ -20,47 +20,270 @@
             <p class="text-lg md:text-xl text-gray-200 max-w-2xl mx-auto mb-8">
                 Discover exclusive kits, gear, and stories from the Halomo United community.
             </p>
-            <a href="#collection" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg text-lg transition-transform transform hover:scale-105">
+            <a href="#collection"
+               class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg text-lg transition-transform transform hover:scale-105">
                 Explore The Collection
             </a>
         </div>
     </div>
-    
-    <div id="collection" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
 
+    <div id="collection" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12"
+         data-product-url-template="{% url 'main:show_product' 0 %}"> <div class="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-900 mb-2">Latest Football Products</h1>
+                <p class="text-gray-600">Stay updated with our newest football kits, gear, and merchandise.</p>
+            </div>
+            <div class="flex-shrink-0 flex gap-3">
+                {% if user.is_authenticated %}
+                <button onclick="showModal()" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded inline-flex items-center transition">+ Add Product</button>
+                {% endif %}
+                <button id="refreshButton" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded inline-flex items-center transition">
+                    <svg id="refreshIcon" class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                    </svg>
+                    <span id="refreshText">Refresh</span>
+                </button>
+            </div>
+        </div>
+        
         <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
             <div>
-                <h2 class="text-3xl font-bold text-gray-900 mb-2">Explore Our Collection</h2>
+                <h2 class="text-2xl font-semibold text-gray-900 mb-2">Explore Our Collection</h2>
                 <p class="text-gray-600">Find the latest drops and essential gear.</p>
             </div>
             <div class="flex space-x-3 mt-4 md:mt-0">
-                <a href="?" class="{% if request.GET.filter == 'all' or not request.GET.filter %}bg-blue-600 text-white{% else %}bg-white text-gray-700 border border-gray-300{% endif %} px-4 py-2 rounded-md font-medium transition-colors hover:bg-blue-600 hover:text-white">
-                    All Products
-                </a>
-                <a href="?filter=my" class="{% if request.GET.filter == 'my' %}bg-blue-600 text-white{% else %}bg-white text-gray-700 border border-gray-300{% endif %} px-4 py-2 rounded-md font-medium transition-colors hover:bg-blue-600 hover:text-white">
-                    My Products
-                </a>
+                <button id="filter-all" class="bg-blue-600 text-white px-4 py-2 rounded-md font-medium transition-colors hover:bg-blue-700">All Products</button>
+                <button id="filter-my" class="bg-white text-gray-700 border border-gray-300 px-4 py-2 rounded-md font-medium transition-colors hover:bg-blue-600 hover:text-white">My Products</button>
             </div>
         </div>
 
-        {% if not product_list %}
-            <div class="bg-white rounded-lg border border-gray-200 p-12 text-center">
-                <div class="w-32 h-32 mx-auto mb-4">
-                    <img src="{% static 'images/no-product.png' %}" alt="No product available" class="w-full h-full object-contain">
-                </div>
-                <h3 class="text-lg font-medium text-gray-900 mb-2">No Products Found</h3>
-                <p class="text-gray-500 mb-6">Be the first to share your football gear with the community.</p>
-                <a href="{% url 'main:create_product' %}" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
-                    Add Product
-                </a>
-            </div>
-        {% else %}
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {% for product in product_list %}
-                    {% include 'card_product.html' with product=product %}
-                {% endfor %}
-            </div>
-        {% endif %}
+        <div id="loading" class="text-center p-12 hidden">...</div>
+        <div id="error" class="text-center p-12 hidden">...</div>
+        <div id="grid" class="hidden"></div>
+        <div id="empty" class="text-center p-12 hidden">...</div>
     </div>
 </div>
+
+{% include 'modal.html' %}
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const PRODUCT_API_ENDPOINT = "{% url 'main:show_json' %}";
+    const CURRENT_USER_ID = "{{ user.id|default_if_none:'' }}";
+
+    const collectionDiv = document.getElementById('collection');
+    const productUrlTemplate = collectionDiv.dataset.productUrlTemplate;
+
+    // Elemen UI
+    const stateElements = {
+        loading: document.getElementById('loading'),
+        error: document.getElementById('error'),
+        empty: document.getElementById('empty'),
+        grid: document.getElementById('grid')
+    };
+    const showAllBtn = document.getElementById('filter-all');
+    const showMyBtn = document.getElementById('filter-my');
+    const refreshBtn = document.getElementById('refreshButton');
+
+    // State aplikasi
+    let activeFilter = 'all';
+    let allProducts = [];
+
+    // Set content untuk state messages
+    stateElements.loading.innerHTML = `
+        <div class="flex flex-col items-center justify-center">
+            <svg class="animate-spin h-12 w-12 text-blue-600 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <p class="text-gray-600 text-lg font-medium">Loading products...</p>
+        </div>
+    `;
+
+    stateElements.error.innerHTML = `
+        <div class="flex flex-col items-center justify-center">
+            <svg class="h-16 w-16 text-red-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <h3 class="text-xl font-semibold text-gray-900 mb-2">Failed to Load Products</h3>
+            <p class="text-gray-600 mb-4">There was an error loading the products. Please try again.</p>
+            <button onclick="location.reload()" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-lg transition">
+                Retry
+            </button>
+        </div>
+    `;
+
+    stateElements.empty.innerHTML = `
+        <div class="flex flex-col items-center justify-center">
+            <svg class="h-24 w-24 text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path>
+            </svg>
+            <h3 class="text-2xl font-semibold text-gray-900 mb-2">No Products Found</h3>
+            <p class="text-gray-600 mb-6">Start adding products to your collection!</p>
+            {% if user.is_authenticated %}
+            <button onclick="showModal()" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-6 rounded-lg transition">
+                + Add Your First Product
+            </button>
+            {% endif %}
+        </div>
+    `;
+
+    function displayState(currentState) {
+        Object.keys(stateElements).forEach(key => {
+            stateElements[key].classList.toggle('hidden', key !== currentState);
+        });
+        if (currentState === 'grid') {
+            stateElements.grid.className = 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6';
+        }
+    }
+
+    function buildProductCard(product) {
+        const item = document.createElement('div');
+        item.className = 'bg-white rounded-lg border border-gray-200 hover:shadow-lg transition-shadow duration-300 overflow-hidden flex flex-col h-full';
+        
+        const detailUrl = productUrlTemplate.replace('0', product.id);
+
+        const imgHTML = product.thumbnail
+            ? `<img src='${product.thumbnail}' alt='${product.name}' class='w-full h-56 object-cover'>`
+            : `<div class='w-full h-56 bg-gray-100 flex items-center justify-center text-gray-400 text-sm'>No Image</div>`;
+
+        const featuredBadge = product.is_featured
+            ? `<span class='inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-yellow-100 text-yellow-800'>Featured</span>`
+            : '';
+
+        const isOwner = CURRENT_USER_ID && Number(product.user_id) === Number(CURRENT_USER_ID);
+        const actionButtons = isOwner ? `
+            <div class="mt-auto pt-4 border-t border-gray-100 space-y-2">
+                <a href="${detailUrl}" class="block text-center text-blue-600 hover:bg-blue-50 text-sm font-medium py-2 px-3 rounded transition">
+                    View Details
+                </a>
+                <div class="flex items-center justify-between gap-2">
+                    <button onclick='editProduct(${JSON.stringify(product)})' class="flex-1 text-blue-600 hover:bg-blue-50 text-sm font-medium py-2 px-3 rounded transition">
+                        Edit
+                    </button>
+                    <button onclick="showDeleteModal('${product.id}')" class="flex-1 text-red-600 hover:bg-red-50 text-sm font-medium py-2 px-3 rounded transition">
+                        Delete
+                    </button>
+                </div>
+            </div>
+        ` : `
+            <div class="mt-auto pt-4 border-t border-gray-100">
+                <a href="${detailUrl}" class="block text-center text-blue-600 hover:bg-blue-50 text-sm font-medium py-2 px-3 rounded transition">
+                    View Details
+                </a>
+            </div>
+        `;
+
+        item.innerHTML = `
+            <div class="aspect-[16/9] relative overflow-hidden">
+                ${imgHTML}
+                <div class="absolute top-3 left-3">${featuredBadge}</div>
+            </div>
+            <div class="p-5 flex flex-col flex-1">
+                <h3 class="text-lg font-semibold text-gray-900 mb-2">${product.name}</h3>
+                <p class="text-gray-600 text-sm mb-3 line-clamp-2">${product.description}</p>
+                <p class="text-blue-600 font-bold mb-2">Rp${product.price.toLocaleString('id-ID')}</p>
+                <span class="inline-block text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded w-fit mb-2">
+                    ${product.category || 'Uncategorized'}
+                </span>
+                ${actionButtons}
+            </div>`;
+        return item;
+    }
+
+    function renderProducts(products) {
+        stateElements.grid.innerHTML = '';
+        products.forEach(p => stateElements.grid.appendChild(buildProductCard(p)));
+    }
+
+    function filterAndRender() {
+        const filtered = activeFilter === 'all'
+            ? allProducts
+            : allProducts.filter(p => Number(p.user_id) === Number(CURRENT_USER_ID));
+
+        if (activeFilter === 'all') {
+            showAllBtn.className = 'bg-blue-600 text-white px-4 py-2 rounded-md font-medium transition-colors hover:bg-blue-700';
+            showMyBtn.className = 'bg-white text-gray-700 border border-gray-300 px-4 py-2 rounded-md font-medium transition-colors hover:bg-blue-600 hover:text-white';
+        } else {
+            showAllBtn.className = 'bg-white text-gray-700 border border-gray-300 px-4 py-2 rounded-md font-medium transition-colors hover:bg-blue-600 hover:text-white';
+            showMyBtn.className = 'bg-blue-600 text-white px-4 py-2 rounded-md font-medium transition-colors hover:bg-blue-700';
+        }
+
+        if (filtered.length === 0) {
+            displayState('empty');
+        } else {
+            renderProducts(filtered);
+            displayState('grid');
+        }
+    }
+    
+    async function fetchProductsFromServer() {
+        displayState('loading');
+        try {
+            const res = await fetch(PRODUCT_API_ENDPOINT);
+            if (!res.ok) throw new Error('Failed to fetch products');
+            allProducts = await res.json();
+            filterAndRender();
+        } catch (e) {
+            console.error('Error fetching products:', e);
+            displayState('error');
+            throw e;
+        }
+    }
+
+    async function refreshProducts() {
+        const refreshIcon = document.getElementById('refreshIcon');
+        const refreshText = document.getElementById('refreshText');
+        
+        refreshBtn.disabled = true;
+        refreshBtn.classList.add('opacity-75', 'cursor-not-allowed');
+        refreshIcon.classList.add('animate-spin');
+        refreshText.textContent = 'Refreshing...';
+        
+        try {
+            await fetchProductsFromServer();
+            if (typeof showToast === 'function') {
+                showToast('Success!', 'Products have been updated.', 'success');
+            }
+        } catch (error) {
+            if (typeof showToast === 'function') {
+                showToast('Error!', 'Failed to refresh products.', 'error');
+            }
+        } finally {
+            setTimeout(() => {
+                refreshBtn.disabled = false;
+                refreshBtn.classList.remove('opacity-75', 'cursor-not-allowed');
+                refreshIcon.classList.remove('animate-spin');
+                refreshText.textContent = 'Refresh';
+            }, 500);
+        }
+    }
+
+ 
+    window.editProduct = function(product) {
+        // Panggil showModal dengan parameter edit
+        showModal(true, product);
+    };
+
+    // Event Listeners
+    refreshBtn.addEventListener('click', refreshProducts);
+    showAllBtn.addEventListener('click', () => { activeFilter = 'all'; filterAndRender(); });
+    showMyBtn.addEventListener('click', () => {
+        if (!CURRENT_USER_ID) {
+            window.location.href = "{% url 'main:login' %}?next=" + window.location.pathname;
+        } else {
+            activeFilter = 'my';
+            filterAndRender();
+        }
+    });
+    
+    // Initial load
+    fetchProductsFromServer();
+    
+    // Custom events
+    document.addEventListener('productAdded', fetchProductsFromServer);
+    document.addEventListener('productDeleted', fetchProductsFromServer);
+    document.addEventListener('productUpdated', fetchProductsFromServer);
+});
+</script>
 {% endblock content %}

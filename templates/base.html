@@ -14,6 +14,10 @@
     </style>
   </head>
   <body>
-    {% block content %} {% endblock content %}
+    {% block content %}
+    {% endblock %}
+    
+    {% include 'modal.html' %}
+    {% include 'toast.html' %}
   </body>
 </html>

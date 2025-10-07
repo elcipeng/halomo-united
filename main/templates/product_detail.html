@@ -2,80 +2,147 @@
 {% load static %}
 
 {% block meta %}
-<title>{{ product.name }} - Football Product</title>
+<title>Product Detail - Halomo United</title>
 {% endblock meta %}
 
 {% block content %}
-<div class="bg-gray-50 w-full min-h-screen">
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        
-        <div class="mb-6">
-            <a href="{% url 'main:show_main' %}" class="text-gray-600 hover:text-gray-900 font-medium transition-colors">
-                ← Back to product
-            </a>
-        </div>
-        
-        <article class="bg-white rounded-lg border-2 border-gray-200 overflow-hidden shadow-sm">
-            
-            <div class="flex flex-col md:flex-row gap-8 p-6 sm:p-8">
+{% include 'navbar.html' %}
+{% include 'toast.html' %}
 
-                <div class="w-full md:w-2/5 overflow-hidden rounded-lg border-2 shadow-sm">
-                    {% if product.thumbnail %}
-                        <img src="{{ product.thumbnail }}" 
-                             alt="{{ product.name }}" 
-                             class="w-full h-auto object-cover transition-transform duration-300 ease-in-out hover:scale-105 cursor-pointer">
-                    {% else %}
-                        <div class="w-full h-80 bg-gray-200 flex items-center justify-center">
-                            <span class="text-gray-500">No Image</span>
-                        </div>
-                    {% endif %}
-                </div>
-
-                <div class="w-full md:w-3/5">
-                    
-                    <div class="flex flex-wrap items-center gap-2 mb-4">
-                        <span class="inline-flex items-center px-3 py-1 rounded-md text-xs font-medium bg-blue-600 text-white">
-                            {{ product.get_category_display }}
-                        </span>
-                        {% if product.is_featured %}
-                            <span class="inline-flex items-center px-3 py-1 rounded-md text-xs font-medium bg-yellow-100 text-yellow-800">
-                                Featured
-                            </span>
-                        {% endif %}
-                    </div>
-                    
-                    <h1 class="text-3xl sm:text-4xl font-bold text-gray-900 leading-tight mb-6">
-                        {{ product.name }}
-                    </h1>
-
-                    <div class="mb-6">
-                        <p class="text-sm text-gray-500">Price</p>
-                        <p class="text-3xl font-bold text-blue-700">
-                            Rp {{ product.price }}
-                        </p>
-                    </div>
-
-                    <div class="mb-6">
-                        <p class="text-sm font-semibold text-gray-800 mb-2">Description</p>
-                        <div class="prose max-w-none text-gray-700 leading-relaxed whitespace-pre-line">
-                            {{ product.description }}
-                        </div>
-                    </div>
-                    
-                    <div class="border-t-2 border-gray-200 pt-4">
-                         <p class="text-sm text-gray-500">Seller</p>
-                         <div class="font-medium text-gray-900">
-                            {% if product.user %}
-                                <p>{{ product.user.username }}</p>
-                            {% else %}
-                                <p>Anonymous</p>
-                            {% endif %}
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-        </article>
+<div class="bg-gray-100 w-full min-h-screen flex items-center justify-center py-12 px-4">
+  <div class="w-full max-w-4xl">
+    
+    <!-- Back Button -->
+    <div class="mb-6">
+      <a href="{% url 'main:show_main' %}" 
+         class="inline-flex items-center text-blue-600 hover:text-blue-800 font-medium">
+        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+        </svg>
+        Back to Products
+      </a>
     </div>
+
+    <!-- Loading State -->
+    <div id="loading" class="bg-white rounded-lg border border-gray-200 p-12 text-center shadow">
+      <svg class="animate-spin h-8 w-8 text-blue-600 inline-block" xmlns="http://www.w3.org/2000/svg"
+           fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10"
+                stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor"
+              d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+      </svg>
+      <p class="text-gray-600 mt-3">Loading product details...</p>
+    </div>
+
+    <!-- Error State -->
+    <div id="error" class="hidden bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative text-center">
+      <strong class="font-bold">Error!</strong>
+      <span class="block sm:inline">Failed to load product details.</span>
+    </div>
+
+    <!-- Product Detail Card -->
+    <div id="product-card" class="hidden bg-white rounded-2xl shadow-2xl overflow-hidden transition-all duration-300">
+      <div class="flex flex-col md:flex-row">
+        <!-- Product Image -->
+        <div class="md:w-1/2">
+          <div id="product-image-container" class="h-96 bg-gray-100 flex items-center justify-center">
+            <span class="text-gray-400">No Image</span>
+          </div>
+        </div>
+
+        <!-- Product Info -->
+        <div class="md:w-1/2 p-8 flex flex-col justify-between">
+          <div>
+            <div class="flex items-start justify-between mb-4">
+              <div>
+                <h1 id="product-name" class="text-3xl font-bold text-gray-900 mb-2"></h1>
+                <span id="product-category" 
+                      class="inline-block text-sm bg-blue-50 text-blue-700 px-3 py-1 rounded-full"></span>
+              </div>
+              <div id="featured-badge" class="hidden">
+                <span class="inline-flex items-center px-3 py-1 rounded text-sm font-medium bg-yellow-100 text-yellow-800">
+                  ⭐ Featured
+                </span>
+              </div>
+            </div>
+
+            <p id="product-price" class="text-4xl font-bold text-blue-600 mb-6"></p>
+
+            <div class="mb-6">
+              <h3 class="text-lg font-semibold text-gray-900 mb-2">Description</h3>
+              <p id="product-description" class="text-gray-700 leading-relaxed"></p>
+            </div>
+          </div>
+
+          <div class="flex justify-center">
+            <button onclick="window.history.back()" 
+                    class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-3 px-8 rounded-lg transition">
+              Go Back
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
 </div>
+
+<!-- AJAX Script -->
+<script>
+  const card = document.getElementById('product-card');
+  const loading = document.getElementById('loading');
+  const errorBox = document.getElementById('error');
+
+  async function fetchProductDetail() {
+    try {
+      loading.classList.remove('hidden');
+      card.classList.add('hidden');
+      errorBox.classList.add('hidden');
+
+      // Get product ID from URL
+      const url = window.location.pathname;
+      const productId = url.split('/').filter(Boolean)[1]; // Gets ID from /product/{id}/
+
+      const response = await fetch(`/json/${productId}/`);
+      if (!response.ok) throw new Error('Product not found');
+
+      const data = await response.json();
+      const product = data[0].fields;
+
+      // Populate product details
+      document.getElementById('product-name').textContent = product.name;
+      document.getElementById('product-price').textContent = `Rp${parseInt(product.price).toLocaleString()}`;
+      document.getElementById('product-description').textContent = product.description;
+      document.getElementById('product-category').textContent = product.category || 'Uncategorized';
+
+      // Handle image
+      const imageContainer = document.getElementById('product-image-container');
+      if (product.thumbnail) {
+        imageContainer.innerHTML = `<img src="${product.thumbnail}" alt="${product.name}" class="w-full h-full object-cover">`;
+      } else {
+        imageContainer.innerHTML = `<span class="text-gray-400 text-lg">No Image Available</span>`;
+      }
+
+      // Show featured badge
+      if (product.is_featured) {
+        document.getElementById('featured-badge').classList.remove('hidden');
+      }
+
+      // Show card
+      loading.classList.add('hidden');
+      card.classList.remove('hidden');
+
+    } catch (error) {
+      console.error('Error:', error);
+      loading.classList.add('hidden');
+      errorBox.classList.remove('hidden');
+      showToast('Error', 'Failed to load product details', 'error');
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', fetchProductDetail);
+</script>
+
 {% endblock content %}

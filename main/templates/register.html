@@ -1,144 +1,235 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block meta %}
 <title>Register - Halomo United</title>
 {% endblock meta %}
 
 {% block content %}
-<div class="min-h-screen bg-white flex items-center justify-center p-8">
-  <div class="max-w-6xl w-full mx-auto grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
-    
-    <div class="w-full">
-      <img src="/static/images/logo-halomo.png" alt="Logo Halomo United" class="h-12 mb-8">
-      <h1 class="text-3xl font-extrabold uppercase mb-8">Registrasi</h1>
+<div class="flex min-h-screen">
+  
+  <!-- Banner Kiri -->
+  <div class="hidden lg:flex w-3/5 bg-gray-600 items-center justify-center">
+    <img src="{% static 'images/login-banner.png' %}" alt="Football" class="max-w-full h-auto opacity-60">
+  </div>
+
+  <!-- Form Register -->
+  <div class="w-full lg:w-2/5 flex items-center justify-center p-8 bg-gray-50">
+    <div class="max-w-md w-full bg-white rounded-lg border border-gray-200 p-6 sm:p-8 shadow-lg">
       
-      {# Form Errors Display #}
-      {% if form.non_field_errors %}
-        <div class="mb-6">
-          {% for error in form.non_field_errors %}
-            <div class="px-4 py-3 rounded text-sm border bg-red-50 border-red-200 text-red-700">
-              {{ error }}
-            </div>
-          {% endfor %}
-        </div>
-      {% endif %}
-
-      {% if form.errors %}
-        <div class="mb-6">
-          {% for field, errors in form.errors.items %}
-            {% if field != '__all__' %}
-              {% for error in errors %}
-                <div class="px-4 py-3 rounded text-sm border bg-red-50 border-red-200 text-red-700 mb-2">
-                  <strong>{{ field|title }}:</strong> {{ error }}
-                </div>
-              {% endfor %}
-            {% endif %}
-          {% endfor %}
-        </div>
-      {% endif %}
-
-      <form method="POST" action="" class="space-y-6">
+      <div class="text-center mb-8">
+        <a href="{% url 'main:show_main' %}" class="inline-block mb-6">
+          <img src="{% static 'images/logo-halomo.png' %}" alt="Halomo United Logo" class="h-16 w-auto">
+        </a>
+        <h1 class="text-2xl font-bold text-gray-900 mb-2">Create Account</h1>
+        <p class="text-gray-600">Join Halomo United Community</p>
+      </div>
+      
+      <form id="registerForm" method="POST" class="space-y-6">
         {% csrf_token %}
         
+        <!-- Username Field -->
         <div>
-          <label for="username" class="block text-sm font-medium text-gray-700 mb-2">Username *</label>
-          <input 
-            id="username" 
-            name="username" 
-            type="text" 
-            required 
-            class="w-full px-4 py-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200" 
-            placeholder="Pilih username kamu">
+          <label for="username" class="block text-sm font-medium text-gray-700 mb-1">Username</label>
+          <input type="text" id="username" name="username" placeholder="Choose a username" required
+                 minlength="3"
+                 class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+          <p class="text-xs text-gray-500 mt-1">At least 3 characters</p>
         </div>
 
+        <!-- Password Field -->
         <div>
-          <label for="password1" class="block text-sm font-medium text-gray-700 mb-2">Password *</label>
-          <input 
-            id="password1" 
-            name="password1" 
-            type="password" 
-            required 
-            class="w-full px-4 py-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200" 
-            placeholder="Buat password">
+          <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+          <input type="password" id="password" name="password" placeholder="Create a password" required
+                 minlength="8"
+                 class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+          <p class="text-xs text-gray-500 mt-1">At least 8 characters</p>
         </div>
 
+        <!-- Confirm Password Field -->
         <div>
-          <label for="password2" class="block text-sm font-medium text-gray-700 mb-2">Confirm Password *</label>
-          <input 
-            id="password2" 
-            name="password2" 
-            type="password" 
-            required 
-            class="w-full px-4 py-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200" 
-            placeholder="Konfirmasi password kamu">
+          <label for="confirmPassword" class="block text-sm font-medium text-gray-700 mb-1">Confirm Password</label>
+          <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Confirm your password" required
+                 minlength="8"
+                 class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+          <p id="passwordMatchMessage" class="text-xs mt-1 hidden"></p>
         </div>
 
-        <button 
-          type="submit" 
-          class="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-200 uppercase">
-          Create Account
+        <!-- Submit Button -->
+        <button type="submit" id="registerButton"
+                class="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed">
+          Register
         </button>
       </form>
 
-      {% if messages %}
-        <div class="mt-6">
-          {% for message in messages %}
-            <div 
-              class="
-                px-4 py-3 rounded text-sm border
-                {% if message.tags == 'success' %}
-                  bg-green-50 border-green-200 text-green-700
-                {% elif message.tags == 'error' %}
-                  bg-red-50 border-red-200 text-red-700
-                {% else %}
-                  bg-gray-50 border-gray-200 text-gray-700
-                {% endif %}
-              ">
-              {{ message }}
-            </div>
-          {% endfor %}
-        </div>
-      {% endif %}
-
-      <div class="mt-6 text-center">
-        <p class="text-gray-600 text-sm">
-          Sudah punya akun? 
+      <div class="mt-6 text-center pt-6 border-t border-gray-200">
+        <p class="text-gray-500 text-sm">
+          Already have an account? 
           <a href="{% url 'main:login' %}" class="text-blue-600 hover:text-blue-700 font-medium">
-            Masuk
+            Sign In
           </a>
         </p>
       </div>
-
-    </div>
-
-    <div class="w-full">
-      <h2 class="text-3xl font-extrabold uppercase mb-4">Buat Akun</h2>
-      <p class="text-gray-700 mb-6">Sangat mudah. Masukkan detail kamu dan nikmati keuntungan dari memiliki akun, misalnya:</p>
-      
-      <ul class="space-y-4">
-        <li class="flex items-start">
-          <svg class="w-6 h-6 text-gray-800 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-          <span class="text-gray-700">Produk dengan harga spesial sepanjang tahun, setiap hari.</span>
-        </li>
-        <li class="flex items-start">
-          <svg class="w-6 h-6 text-gray-800 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-          <span class="text-gray-700">Tinjauan informasi personal kamu</span>
-        </li>
-        <li class="flex items-start">
-          <svg class="w-6 h-6 text-gray-800 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-          <span class="text-gray-700">Lacak & cek pesanan kamu</span>
-        </li>
-        <li class="flex items-start">
-          <svg class="w-6 h-6 text-gray-800 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-          <span class="text-gray-700">Kelola Wishlist</span>
-        </li>
-        <li class="flex items-start">
-          <svg class="w-6 h-6 text-gray-800 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-          <span class="text-gray-700">Checkout lebih cepat</span>
-        </li>
-      </ul>
-
     </div>
   </div>
 </div>
+
+<!-- Toast container -->
+<div id="toastContainer" class="fixed bottom-4 right-4 z-[9999] space-y-3"></div>
+
+<script>
+// Fungsi showToast
+function showToast(title, message = "", type = "info") {
+  const container = document.getElementById("toastContainer");
+  const toast = document.createElement("div");
+
+  let bgColor = "bg-gray-800";
+  if (type === "success") bgColor = "bg-green-600";
+  if (type === "error") bgColor = "bg-red-600";
+  if (type === "warning") bgColor = "bg-yellow-500";
+
+  toast.className = `${bgColor} text-white px-4 py-3 rounded-lg shadow-lg animate-fade-in`;
+  toast.innerHTML = `
+    <div class="font-semibold">${title}</div>
+    ${message ? `<div class="text-sm">${message}</div>` : ""}
+  `;
+
+  container.appendChild(toast);
+
+  setTimeout(() => {
+    toast.classList.add("opacity-0", "transition", "duration-500");
+    setTimeout(() => toast.remove(), 500);
+  }, 3000);
+}
+
+document.addEventListener("DOMContentLoaded", function() {
+  const form = document.getElementById("registerForm");
+  const registerButton = document.getElementById("registerButton");
+  const password = document.getElementById("password");
+  const confirmPassword = document.getElementById("confirmPassword");
+  const passwordMatchMessage = document.getElementById("passwordMatchMessage");
+  const username = document.getElementById("username");
+
+  // Real-time password match validation
+  function checkPasswordMatch() {
+    if (confirmPassword.value === "") {
+      passwordMatchMessage.classList.add("hidden");
+      confirmPassword.classList.remove("border-red-500", "border-green-500");
+      return;
+    }
+
+    if (password.value === confirmPassword.value) {
+      passwordMatchMessage.textContent = "✓ Passwords match";
+      passwordMatchMessage.className = "text-xs mt-1 text-green-600";
+      confirmPassword.classList.remove("border-red-500");
+      confirmPassword.classList.add("border-green-500");
+    } else {
+      passwordMatchMessage.textContent = "✗ Passwords do not match";
+      passwordMatchMessage.className = "text-xs mt-1 text-red-600";
+      confirmPassword.classList.remove("border-green-500");
+      confirmPassword.classList.add("border-red-500");
+    }
+  }
+
+  password.addEventListener("input", checkPasswordMatch);
+  confirmPassword.addEventListener("input", checkPasswordMatch);
+
+  // Form submission
+  form.addEventListener("submit", async function(e) {
+    e.preventDefault();
+    
+    const usernameValue = username.value.trim();
+    const passwordValue = password.value;
+    const confirmPasswordValue = confirmPassword.value;
+
+    // Validasi username
+    if (usernameValue.length < 3) {
+      showToast("Invalid Username", "Username must be at least 3 characters long", "error");
+      return;
+    }
+
+    // Validasi password length
+    if (passwordValue.length < 8) {
+      showToast("Invalid Password", "Password must be at least 8 characters long", "error");
+      return;
+    }
+
+    // Validasi password match
+    if (passwordValue !== confirmPasswordValue) {
+      showToast("Password Mismatch", "Passwords do not match. Please check again.", "error");
+      confirmPassword.focus();
+      return;
+    }
+
+    const originalText = registerButton.textContent;
+    registerButton.disabled = true;
+    registerButton.textContent = "Creating Account...";
+
+    try {
+      // Kirim hanya username dan password 
+      const formData = new FormData();
+      formData.append('username', usernameValue);
+      formData.append('password', passwordValue);
+      
+      // Tambahkan CSRF token
+      const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+      formData.append('csrfmiddlewaretoken', csrfToken);
+
+      const response = await fetch("{% url 'main:register_ajax' %}", {
+        method: "POST",
+        body: formData,
+        headers: { 
+          "Accept": "application/json",
+          "X-CSRFToken": csrfToken
+        }
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.status) {
+        showToast("Success!", "Account created successfully", "success");
+        setTimeout(() => {
+          window.location.href = "{% url 'main:login' %}?registered=true";
+        }, 1000);
+      } else {
+        showToast("Registration Failed", data.message || "Please try again", "error");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      showToast("Error", "Something went wrong. Please try again.", "error");
+    } finally {
+      registerButton.disabled = false;
+      registerButton.textContent = originalText;
+    }
+  });
+
+  // Password strength indicator 
+  password.addEventListener("input", function() {
+    const value = password.value;
+    let strength = 0;
+    
+    if (value.length >= 8) strength++;
+    if (value.match(/[a-z]/)) strength++;
+    if (value.match(/[A-Z]/)) strength++;
+    if (value.match(/[0-9]/)) strength++;
+    if (value.match(/[^a-zA-Z0-9]/)) strength++;
+
+  });
+});
+</script>
+
+<style>
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* Smooth transition untuk border color */
+input {
+  transition: border-color 0.2s ease;
+}
+</style>
 {% endblock content %}

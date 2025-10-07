@@ -199,8 +199,6 @@ Kelas : PBP D
 
 PWS : https://justin-dwitama-halomounited.pbp.cs.ui.ac.id
 
-Tentu, ini adalah versi ringkas yang sudah diformat dalam Markdown. Anda bisa langsung salin-tempel seluruhnya ke dalam file README.md Anda.
-
 ## 1. Urutan Prioritas CSS Selector
 Prioritas selector CSS ditentukan oleh spesifisitas (specificity). Aturan dengan spesifisitas lebih tinggi akan diterapkan. Urutan dari prioritas tertinggi hingga terendah adalah:
 1. Inline Styles (atribut style="...")
@@ -259,3 +257,27 @@ Proses pengerjaan tugas ini dilakukan dengan alur sebagai berikut:
 4. Kustomisasi Halaman Detail Produk: Halaman detail produk, yang diakses dari link "Read more" pada kartu, juga didesain ulang. Saya menerapkan layout dua kolom menggunakan Flexbox untuk memisahkan gambar produk di sisi kiri dan detail informasinya (harga, deskripsi, penjual) di sisi kanan, sehingga lebih mudah dibaca.
 
 5. Finalisasi Desain Forms (Create & Edit): Sebagai langkah terakhir, saya melakukan kustomisasi pada halaman create_product.html dan edit_product.html. Untuk memastikan semua form memiliki tampilan yang konsisten, saya meninggalkan looping form Django yang generik. Sebagai gantinya, semua styling (seperti border, padding, dan focus ring) didefinisikan secara terpusat di forms.py menggunakan atribut widgets. Dengan cara ini, satu ProductForm yang sudah didesain dengan baik dapat digunakan untuk kedua halaman tersebut, memastikan tampilan yang seragam dan profesional.
+
+# Tugas 6: Javascript dan AJAX
+Nama : Justin Dwitama Seniang
+NPM : 2406406742
+Kelas : PBP D
+
+PWS : https://justin-dwitama-halomounited.pbp.cs.ui.ac.id
+
+## 1. Apa perbedaan antara synchronous request dan asynchronous request?
+Synchronous request berjalan dengan cara menunggu satu proses selesai terlebih dahulu sebelum melanjutkan ke proses berikutnya, sehingga pengguna harus menunggu sampai halaman dimuat ulang sepenuhnya. Sedangkan asynchronous request memungkinkan pengiriman dan penerimaan data ke server tanpa harus me-reload seluruh halaman, sehingga proses lain tetap bisa berjalan paralel.
+
+## 2. Bagaimana AJAX bekerja di Django (alur request–response)?
+AJAX di Django bekerja dengan mengirimkan request ke server melalui JavaScript tanpa reload halaman. Request ini diproses oleh view di Django, lalu server mengembalikan response dalam format JSON atau data lain. Data tersebut kemudian diproses kembali oleh JavaScript di frontend untuk ditampilkan ke pengguna secara dinamis.
+
+## 3. Apa keuntungan menggunakan AJAX dibandingkan render biasa di Django?
+AJAX memberikan pengalaman yang lebih interaktif karena tidak memerlukan reload halaman penuh. Hal ini mengurangi waktu tunggu, membuat aplikasi lebih responsif, serta meningkatkan efisiensi karena hanya data yang dibutuhkan saja yang ditransfer, bukan seluruh halaman.
+
+## 4. Bagaimana cara memastikan keamanan saat menggunakan AJAX untuk fitur Login dan Register di Django?
+
+Keamanan AJAX dapat dijaga dengan memastikan penggunaan CSRF token pada setiap request, mengenkripsi data sensitif seperti password, serta melakukan validasi input baik di sisi frontend maupun backend. Selain itu, komunikasi sebaiknya menggunakan protokol HTTPS agar data tidak mudah disadap.
+
+## 5. Bagaimana AJAX mempengaruhi pengalaman pengguna (User Experience) pada website?
+
+AJAX meningkatkan pengalaman pengguna karena membuat website terasa lebih cepat, dinamis, dan interaktif. Dengan meminimalkan reload halaman, pengguna bisa berinteraksi secara lebih mulus, misalnya saat login, register, atau mengirim data, sehingga alur penggunaan terasa lebih modern dan nyaman.

@@ -8,106 +8,43 @@
 {% block content %}
 <div class="flex min-h-screen">
   
-  <!-- Bagian kiri (foto/branding) -->
+  <!-- Banner Kiri -->
   <div class="hidden lg:flex w-3/5 bg-gray-600 items-center justify-center">
     <img src="{% static 'images/login-banner.png' %}" alt="Football" class="max-w-full h-auto opacity-60">
   </div>
 
-  <!-- Bagian kanan (form login) -->
+  <!-- Form Login -->
   <div class="w-full lg:w-2/5 flex items-center justify-center p-8 bg-gray-50">
     <div class="max-w-md w-full bg-white rounded-lg border border-gray-200 p-6 sm:p-8 shadow-lg">
       
       <div class="text-center mb-8">
         <a href="{% url 'main:show_main' %}" class="inline-block mb-6">
-            <img src="{% static 'images/logo-halomo.png' %}" alt="Halomo United Logo" class="h-16 w-auto">
+          <img src="{% static 'images/logo-halomo.png' %}" alt="Halomo United Logo" class="h-16 w-auto">
         </a>
         <h1 class="text-2xl font-bold text-gray-900 mb-2">Sign In</h1>
         <p class="text-gray-600">Welcome back to Halomo United</p>
       </div>
-      <!-- ============================================= -->
-
-      <!-- Form Errors Display -->
-      {% if form.non_field_errors %}
-        <div class="mb-6">
-          {% for error in form.non_field_errors %}
-            <div class="px-4 py-3 rounded-md text-sm border bg-red-50 border-red-200 text-red-700">
-              {{ error }}
-            </div>
-          {% endfor %}
-        </div>
-      {% endif %}
-
-      {% if form.errors %}
-        <div class="mb-6">
-          {% for field, errors in form.errors.items %}
-            {% if field != '__all__' %}
-              {% for error in errors %}
-                <div class="px-4 py-3 rounded-md text-sm border bg-red-50 border-red-200 text-red-700 mb-2">
-                  <strong>{{ field|title }}:</strong> {{ error }}
-                </div>
-              {% endfor %}
-            {% endif %}
-          {% endfor %}
-        </div>
-      {% endif %}
-
-      <form method="POST" action="" class="space-y-6">
+      
+      <form id="loginForm" method="POST" class="space-y-6">
         {% csrf_token %}
-        
         <div>
-          <label for="username" class="block text-sm font-medium text-gray-700 mb-2">Username</label>
-          <input 
-            id="username" 
-            name="username" 
-            type="text" 
-            required 
-            class="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500 transition-colors" 
-            placeholder="Enter your username">
+          <input type="text" name="username" placeholder="Username" required
+                 class="w-full px-3 py-2 border border-gray-300 rounded-md">
         </div>
-
         <div>
-          <label for="password" class="block text-sm font-medium text-gray-700 mb-2">Password</label>
-          <input 
-            id="password" 
-            name="password" 
-            type="password" 
-            required 
-            class="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500 transition-colors" 
-            placeholder="Enter your password">
+          <input type="password" name="password" placeholder="Password" required
+                 class="w-full px-3 py-2 border border-gray-300 rounded-md">
         </div>
-
-        <button 
-          type="submit" 
-          class="w-full bg-blue-600 text-white font-medium py-3 px-4 rounded-md hover:bg-blue-700 transition-colors">
+        <button type="submit" id="loginButton"
+                class="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700">
           Sign In
         </button>
       </form>
 
-      <!-- Messages Display -->
-      {% if messages %}
-        <div class="mt-6">
-          {% for message in messages %}
-            <div 
-              class="
-                px-4 py-3 rounded-md text-sm border
-                {% if message.tags == 'success' %}
-                  bg-green-50 border-green-200 text-green-700
-                {% elif message.tags == 'error' %}
-                  bg-red-50 border-red-200 text-red-700
-                {% else %}
-                  bg-gray-50 border-gray-200 text-gray-700
-                {% endif %}
-              ">
-              {{ message }}
-            </div>
-          {% endfor %}
-        </div>
-      {% endif %}
-
       <div class="mt-6 text-center pt-6 border-t border-gray-200">
         <p class="text-gray-500 text-sm">
-          Don't have an account? 
-          <a href="{% url 'main:register' %}" class="text-blue-600 hover:text-blue-700 font-medium">
+          Don’t have an account? 
+          <a href="{% url 'main:register_ajax' %}" class="text-blue-600 hover:text-blue-700 font-medium">
             Register Now
           </a>
         </p>
@@ -115,4 +52,98 @@
     </div>
   </div>
 </div>
+
+<!-- Toast container -->
+<div id="toastContainer" class="fixed bottom-4 right-4 z-[9999] space-y-3"></div>
+
+<script>
+// Fungsi showToast
+function showToast(title, message = "", type = "info") {
+  const container = document.getElementById("toastContainer");
+  const toast = document.createElement("div");
+
+  let bgColor = "bg-gray-800";
+  if (type === "success") bgColor = "bg-green-600";
+  if (type === "error") bgColor = "bg-red-600";
+  if (type === "warning") bgColor = "bg-yellow-500";
+
+  toast.className = `${bgColor} text-white px-4 py-3 rounded-lg shadow-lg animate-fade-in`;
+  toast.innerHTML = `
+    <div class="font-semibold">${title}</div>
+    ${message ? `<div class="text-sm">${message}</div>` : ""}
+  `;
+
+  container.appendChild(toast);
+
+  // Hapus setelah 3 detik
+  setTimeout(() => {
+    toast.classList.add("opacity-0", "transition", "duration-500");
+    setTimeout(() => toast.remove(), 500);
+  }, 3000);
+}
+
+document.addEventListener("DOMContentLoaded", function() {
+  const form = document.getElementById("loginForm");
+  const loginButton = document.getElementById("loginButton");
+
+  // Login handler
+  form.addEventListener("submit", async function(e) {
+    e.preventDefault();
+    const originalText = loginButton.textContent;
+
+    loginButton.disabled = true;
+    loginButton.textContent = "Logging in...";
+
+    try {
+      const response = await fetch("{% url 'main:login' %}", {
+        method: "POST",
+        body: new FormData(form),
+        headers: { "Accept": "application/json" }
+      });
+
+      if (response.ok) {
+        showToast("Login berhasil!", "", "success");
+        setTimeout(() => {
+          window.location.href = "{% url 'main:show_main' %}";
+        }, 1000);
+      } else {
+        const errorData = await response.json().catch(() => null);
+        showToast("Login gagal", errorData?.message || "Username atau password salah", "error");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      showToast("Login error", "Something went wrong", "error");
+    } finally {
+      loginButton.disabled = false;
+      loginButton.textContent = originalText;
+    }
+  });
+
+  // Cek query param logout
+  const params = new URLSearchParams(window.location.search);
+  if (params.get("logout") === "success") {
+    showToast("Logout berhasil!", "", "success");
+  }
+});
+// Cek query param logout DAN registered
+const params = new URLSearchParams(window.location.search);
+
+if (params.get("logout") === "true") {
+  showToast("Logout Success!", "You have been logged out successfully.", "success");
+}
+
+if (params.get("registered") === "true") {
+  showToast("Registration Success!", "Your account has been created. Please login.", "success");
+}
+</script>
+
+<style>
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+</style>
 {% endblock content %}
