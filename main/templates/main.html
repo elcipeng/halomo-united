@@ -43,6 +43,8 @@
                     </svg>
                     <span id="refreshText">Refresh</span>
                 </button>
+                <button id="sortAsc" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded inline-flex items-center transition">Ascending</button>
+                <button id="sortDesc" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded inline-flex items-center transition">Descending</button>
             </div>
         </div>
         
@@ -285,5 +287,24 @@ document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('productDeleted', fetchProductsFromServer);
     document.addEventListener('productUpdated', fetchProductsFromServer);
 });
+// function renderProducts(data) {
+//     const container = doucment.getElementById("productContainer")
+//     container.innerHTML="";
+
+//     data.forEach(item => {
+//         const product =item.fields;
+//         container.innerHTML += '
+//         <div class
+//         '
+//     })
+// }
+
+// function fetchSortedProducts(order){
+//     fetch('/sort-products/?order=${order}')
+//       .then(response => response.json)
+//       .then(data => renderProducts(data))
+//       .catch
+
+// }
 </script>
 {% endblock content %}

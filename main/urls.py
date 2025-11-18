@@ -1,6 +1,6 @@
 from django.urls import path
 from . import views
-from main.views import logout_user, edit_product, login_view
+from main.views import logout_user, edit_product, login_view, proxy_image, create_product_flutter
 
 app_name = 'main'
 
@@ -32,4 +32,10 @@ urlpatterns = [
     path('create-product-ajax/', views.create_product_ajax, name='create_product_ajax'),
     path('update-product-ajax/<int:id>/', views.update_product_ajax, name='update_product_ajax'),
     path('delete-product-ajax/<int:id>/', views.delete_product_ajax, name='delete_product_ajax'),
+
+    path('proxy-image/', proxy_image, name='proxy_image'),
+    path('create-flutter/', create_product_flutter, name='create_product_flutter'),
+    path('json/my-products/', views.my_products_json, name='my_products_json'),
+
 ]
+    

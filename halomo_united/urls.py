@@ -25,10 +25,10 @@ from django.conf import settings
 from django.conf.urls.static import static
 
 
-
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('main.urls')),  # arahkan ke app "main"
+    path('auth/', include('authentication.urls')),
 ]
 
 if settings.DEBUG:

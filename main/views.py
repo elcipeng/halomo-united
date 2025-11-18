@@ -10,9 +10,150 @@ from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt, ensure_csrf_cookie
 from django.views.decorators.http import require_http_methods
 import json
-
+from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth import authenticate
+from django.utils.html import strip_tags
+import json
+from django.http import JsonResponse
 from .models import Product
 from .forms import ProductForm
+from django.core import serializers
+
+import requests
+
+from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
+from .models import Product  # sesuaikan nama model
+
+from django.views.decorators.http import require_POST
+from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse, HttpResponseBadRequest
+from django.utils.html import strip_tags
+from django.core.validators import URLValidator
+from django.core.exceptions import ValidationError
+import json
+
+@login_required
+def my_products_json(request):
+    qs = Product.objects.filter(user=request.user).values(
+        'id','name','price','description','thumbnail','category','is_featured','user_id'
+    )
+    return JsonResponse(list(qs), safe=False)
+
+
+@require_POST
+@csrf_exempt
+@login_required
+def create_product_flutter(request):
+    """
+    Endpoint for Flutter/mobile clients.
+    Accepts JSON body (preferred) or form-data.
+    If the request has an authenticated session, use request.user.
+    Otherwise, accept 'username' + 'password' in the JSON body to authenticate.
+    """
+    if request.method != "POST":
+        return JsonResponse({"status": False, "message": "Invalid request method."}, status=405)
+
+    # parse JSON if possible, otherwise fall back to form-encoded POST
+    try:
+        data = json.loads(request.body.decode('utf-8')) if request.body else {}
+    except (json.JSONDecodeError, UnicodeDecodeError):
+        # fallback to POST data (FormData)
+        data = request.POST.dict() if hasattr(request, 'POST') else {}
+
+    # Determine user: prefer session user, otherwise try credentials in payload
+    user = request.user if request.user.is_authenticated else None
+    if not user:
+        username = data.get("username")
+        password = data.get("password")
+        if username and password:
+            user = authenticate(request, username=username, password=password)
+
+    if not user:
+        return JsonResponse({"status": "error", "message": "Authentication required"}, status=401)
+
+    name = strip_tags(data.get("name", "")).strip()
+    description = strip_tags(data.get("description", "")).strip()
+    category = (data.get("category", "") or "").strip()
+    thumbnail = (data.get("thumbnail", "") or "").strip()
+    is_featured = bool(data.get("is_featured", False))
+    price_raw = data.get("price", None)
+
+    errors = {}
+
+    if not name:
+        errors["name"] = "Name is required"
+    elif len(name) < 3:
+        errors["name"] = "Name too short"
+
+    if not description:
+        errors["description"] = "Description is required"
+    elif len(description) < 10:
+        errors["description"] = "Description too short"
+
+    if price_raw is None or price_raw == "":
+        errors["price"] = "Price is required"
+    else:
+        try:
+            price = float(price_raw)
+            if price <= 0:
+                errors["price"] = "Price must be greater than 0"
+        except (ValueError, TypeError):
+            errors["price"] = "Price must be a number"
+
+    if thumbnail:
+        validator = URLValidator()
+        try:
+            validator(thumbnail)
+        except ValidationError:
+            errors["thumbnail"] = "Invalid thumbnail URL"
+
+    if errors:
+        return JsonResponse({"status": "error", "errors": errors}, status=400)
+
+    new_product = Product.objects.create(
+        name=name,
+        description=description,
+        price=price,
+        category=category,
+        thumbnail=thumbnail,
+        is_featured=is_featured,
+        user=user,
+    )
+
+    return JsonResponse({"status": "success", "id": new_product.id}, status=201)
+
+
+def proxy_image(request):
+    image_url = request.GET.get('url')
+    if not image_url:
+        return HttpResponse('No URL provided', status=400)
+    
+    try:
+        # Fetch image from external source
+        response = requests.get(image_url, timeout=10)
+        response.raise_for_status()
+        
+        # Return the image with proper content type
+        return HttpResponse(
+            response.content,
+            content_type=response.headers.get('Content-Type', 'image/jpeg')
+        )
+    except requests.RequestException as e:
+        return HttpResponse(f'Error fetching image: {str(e)}', status=500)
+    
+
+
+def sort_products(request):
+    sort_o = request.GET.get('desc', 'asc')
+
+    if sort_o == 'desc':
+        products = product.object.all().ordey_by('-price')
+    else:
+        products = product.object.all().ordey_by('price')
+
+    data = serializers.serialize('json', products)
+    return HttpResponse(data, content_type='halomo_united/json')
 
 
 @login_required(login_url='/login/')
@@ -142,8 +283,25 @@ def register_ajax(request):
     }, status=405)
 
 def show_json(request):
-    """Mengembalikan semua produk dalam format JSON."""
-    product_list = Product.objects.all()
+    """
+    Return products as JSON.
+    Query params:
+      - ?user_only=true  -> returns only authenticated user's products (requires session)
+      - ?user_id=NN      -> returns products for user with id NN
+    Default: return all products.
+    """
+    user_only = request.GET.get("user_only") == "true"
+    user_id = request.GET.get("user_id")
+
+    if user_only:
+        if not request.user.is_authenticated:
+            return JsonResponse({"error": "Authentication required"}, status=401)
+        product_list = Product.objects.filter(user=request.user)
+    elif user_id:
+        product_list = Product.objects.filter(user__id=user_id)
+    else:
+        product_list = Product.objects.all()
+
     data = [{
         'id': p.id, 'name': p.name, 'price': float(p.price), 'description': p.description,
         'thumbnail': p.thumbnail or None, 'category': p.category, 'is_featured': p.is_featured,
